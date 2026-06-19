@@ -74,23 +74,28 @@ export default function App() {
       return;
     }
 
+    const currentSettings = dbAdapter.getSettings();
+    const expectedEmail = currentSettings.loginEmail || 'bahlil.99909@gmail.com';
+    const expectedPassword = currentSettings.loginPassword || 'admin';
+    const expectedUsername = currentSettings.loginUsername || currentSettings.defaultDoctorName || 'dr. Baharuddin Yusuf, Sp.PD';
+
     // Secure authentication check (Ready for production)
     // Accept user email from platform or admin
     if (
-      (authEmail === 'bahlil.99909@gmail.com' && authPassword === 'admin') || 
+      (authEmail === expectedEmail && authPassword === expectedPassword) || 
       (authEmail === 'admin' && authPassword === 'admin')
     ) {
       const session: UserSession = {
         id: 'usr-admin-1',
         email: authEmail,
-        name: 'dr. Baharuddin Yusuf, Sp.PD',
+        name: expectedUsername,
         role: 'Dokter',
       };
       localStorage.setItem('exora_session_active', JSON.stringify(session));
       setCurrentUser(session);
       setIsAuthenticated(true);
     } else {
-      setAuthError('Kredensial salah. Gunakan email: bahlil.99909@gmail.com dan sandi: admin');
+      setAuthError(`Kredensial salah. Gunakan email / sandi yang telah dikonfigurasi.`);
     }
   };
 
@@ -205,9 +210,10 @@ export default function App() {
           <div className="bg-sage-50 border border-sage-200 p-3 rounded-xl flex gap-2 items-start text-[11px] text-sage-600 leading-relaxed font-sans font-medium">
             <KeyRound className="w-4 h-4 text-sage-500 shrink-0 mt-0.5" />
             <div>
-              <strong>Kredensial Akses Demo Default:</strong><br />
-              Email: <span className="font-mono font-bold text-sage-700">bahlil.99909@gmail.com</span><br />
-              Sandi: <span className="font-mono font-bold text-sage-100/10 bg-slate-100 px-1 py-0.5 text-sage-700">admin</span>
+              <strong>Kredensial Akses Klinik Aktif:</strong><br />
+              Email: <span className="font-mono font-bold text-sage-700">{dbAdapter.getSettings().loginEmail || 'bahlil.99909@gmail.com'}</span><br />
+              Sandi: <span className="font-mono font-bold text-sage-700">{dbAdapter.getSettings().loginPassword || 'admin'}</span>
+              <p className="mt-1 text-[9px] text-slate-400 font-sans italic">Dapat diubah kapan saja di tab Pengaturan Klinik.</p>
             </div>
           </div>
 
