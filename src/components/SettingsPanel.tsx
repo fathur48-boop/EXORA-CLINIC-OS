@@ -22,6 +22,11 @@ export default function SettingsPanel({ settings, onRefresh }: SettingsPanelProp
   const [supabaseUrl, setSupabaseUrl] = useState(settings.supabaseUrl || '');
   const [supabaseAnonKey, setSupabaseAnonKey] = useState(settings.supabaseAnonKey || '');
   const [groqApiKey, setGroqApiKey] = useState(settings.groqApiKey || '');
+
+  // User Authentication settings state
+  const [loginEmail, setLoginEmail] = useState(settings.loginEmail || 'bahlil.99909@gmail.com');
+  const [loginPassword, setLoginPassword] = useState(settings.loginPassword || 'admin');
+  const [loginUsername, setLoginUsername] = useState(settings.loginUsername || 'dr. Baharuddin Yusuf, Sp.PD');
   
   const [clinicName, setClinicName] = useState(settings.clinicName || 'Exora Health Care Clinic');
 
@@ -69,6 +74,9 @@ export default function SettingsPanel({ settings, onRefresh }: SettingsPanelProp
       defaultDoctorName,
       waTemplateNewAppointment,
       waTemplateReminder,
+      loginEmail,
+      loginPassword,
+      loginUsername,
     });
 
     onRefresh();
@@ -257,11 +265,65 @@ export default function SettingsPanel({ settings, onRefresh }: SettingsPanelProp
             </div>
           </div>
 
+          {/* Login Credentials Settings */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-4 text-xs font-sans">
+            <h3 className="font-sans font-bold text-sage-800 border-b pb-2 flex gap-2 items-center">
+              <KeyRound className="w-4 h-4 text-sage-600" />
+              3. Kredensial & Akun Login Sistem (Akses Masuk)
+            </h3>
+
+            <div className="bg-amber-50/50 border border-amber-200 p-3 rounded-lg flex gap-2 items-start text-amber-800 leading-relaxed text-[11px] font-medium">
+              <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0" />
+              <span>Gunakan kredensial khusus ini untuk menjaga keamanan akses sistem operasional EHR klinik Anda. Kredensial baru ini akan langsung aktif setelah Anda menekan tombol simpan di bawah.</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <label className="text-slate-500 font-semibold text-sage-800">Email / Username Login *</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="bahlil.99909@gmail.com"
+                  value={loginEmail}
+                  id="settings-login-email"
+                  onChange={e => setLoginEmail(e.target.value)}
+                  className="w-full p-2.5 border border-slate-200 rounded-lg outline-none font-mono"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-500 font-semibold text-sage-800">Kata Sandi Login Baru *</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="admin"
+                  value={loginPassword}
+                  id="settings-login-password"
+                  onChange={e => setLoginPassword(e.target.value)}
+                  className="w-full p-2.5 border border-slate-200 rounded-lg outline-none font-mono"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-500 font-semibold text-sage-800">Nama Lengkap Pengguna *</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="dr. Baharuddin Yusuf, Sp.PD"
+                  value={loginUsername}
+                  id="settings-login-username"
+                  onChange={e => setLoginUsername(e.target.value)}
+                  className="w-full p-2.5 border border-slate-200 rounded-lg outline-none font-semibold text-slate-800"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* WA templates */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-4 text-xs font-sans">
             <h3 className="font-sans font-bold text-sage-800 border-b pb-2 flex gap-2 items-center">
               <ClipboardList className="w-4 h-4 text-sage-600" />
-              3. Preset Format Pesan Otomatis WhatsApp
+              4. Preset Format Pesan Otomatis WhatsApp
             </h3>
 
             <div className="bg-slate-50 border border-slate-150 p-3 rounded-lg leading-relaxed text-[11px] text-slate-500 flex gap-2">
