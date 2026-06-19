@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   Settings, KeyRound, Building, ClipboardList, Database, Save, Download, 
-  Upload, CheckCircle, ShieldAlert, Sparkles, AlertCircle 
+  Upload, CheckCircle, ShieldAlert, Sparkles, AlertCircle, Trash2 
 } from 'lucide-react';
 import { SystemSettings } from '../types';
 import { dbAdapter } from '../db/dbAdapter';
@@ -111,6 +111,16 @@ export default function SettingsPanel({ settings, onRefresh }: SettingsPanelProp
       }
     };
     fileReader.readAsText(targetFile);
+  };
+
+  const handleClearAllData = () => {
+    if (window.confirm('Apakah Anda benar-benar yakin ingin menghapus seluruh data dummy klinik saat ini? Seluruh data pasien, riwayat janji temu, obat-obatan, dan tagihan akan dikosongkan secara permanen.')) {
+      dbAdapter.clearAllData();
+      onRefresh();
+      setToastMsg('Seluruh Data Dummy Berhasil Dihapus (Database Kosong)!');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
   };
 
   return (
@@ -481,6 +491,21 @@ CREATE POLICY "Allow public delete inv" ON public.invoices FOR DELETE TO anon US
                   <span>{restoreFileError}</span>
                 </div>
               )}
+            </div>
+
+            <div className="border-t border-slate-100 pt-4 space-y-2">
+              <span className="font-semibold text-rose-600 block text-[10px] uppercase font-mono tracking-wider">Danger Zone:</span>
+              <p className="text-[10px] text-slate-400 leading-normal">
+                Pembersihan data ini bersifat permanen. Disarankan untuk melakukan <strong>Ekspor Basis Data (.json)</strong> terlebih dahulu sebelum melakukan pembersihan jika Anda membutuhkan cadangannya.
+              </p>
+              <button
+                type="button"
+                onClick={handleClearAllData}
+                id="btn-clear-all-data-dummy"
+                className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 border border-rose-200 hover:border-rose-300 font-bold py-2 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors cursor-pointer text-[11px]"
+              >
+                <Trash2 className="w-4 h-4" /> Hapus Semua Data Dummy Klinik
+              </button>
             </div>
           </div>
 
