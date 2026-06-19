@@ -19,12 +19,29 @@ const KEYS = {
 export function getSupabase() {
   try {
     const data = localStorage.getItem(KEYS.SETTINGS);
-    if (!data) return null;
-    const settings: SystemSettings = JSON.parse(data);
-    if (settings.supabaseUrl?.trim() && settings.supabaseAnonKey?.trim()) {
-      return createClient(settings.supabaseUrl.trim(), settings.supabaseAnonKey.trim(), {
-        auth: { persistSession: false }
-      });
+    let settings: SystemSettings;
+    if (data) {
+      try {
+        settings = { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+      } catch (e) {
+        settings = DEFAULT_SETTINGS;
+      }
+    } else {
+      settings = DEFAULT_SETTINGS;
+    }
+
+    const url = (settings.supabaseUrl || (import.meta as any).env.VITE_SUPABASE_URL || '').trim();
+    const anonKey = (settings.supabaseAnonKey || (import.meta as any).env.VITE_SUPABASE_ANON_KEY || '').trim();
+
+    if (url && anonKey) {
+      // Validate that it is a valid URL before instantiating
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return createClient(url, anonKey, {
+          auth: { persistSession: false }
+        });
+      } else {
+        console.warn('Supabase URL must start with http:// or https://');
+      }
     }
   } catch (err) {
     console.warn('Error reading Supabase settings:', err);
@@ -48,9 +65,9 @@ export async function safeSupabaseUpsert(tableName: string, data: any) {
 
 // Initial system seed settings
 export const DEFAULT_SETTINGS: SystemSettings = {
-  supabaseUrl: '',
-  supabaseAnonKey: '',
-  groqApiKey: '',
+  supabaseUrl: (import.meta as any).env.VITE_SUPABASE_URL || '',
+  supabaseAnonKey: (import.meta as any).env.VITE_SUPABASE_ANON_KEY || '',
+  groqApiKey: (import.meta as any).env.VITE_GROQ_API_KEY || '',
   clinicName: 'Exora Health Care Clinic',
   clinicPhone: '6281234567890',
   clinicAddress: 'Jl. Jenderal Sudirman No. 45, Jakarta Selatan, Indonesia',
@@ -836,7 +853,13 @@ export const dbAdapter = {
   getSettings(): SystemSettings {
     this.initialize();
     const data = localStorage.getItem(KEYS.SETTINGS);
-    return data ? JSON.parse(data) : DEFAULT_SETTINGS;
+    if (!data) return DEFAULT_SETTINGS;
+    try {
+      const parsed = JSON.parse(data);
+      return { ...DEFAULT_SETTINGS, ...parsed };
+    } catch (e) {
+      return DEFAULT_SETTINGS;
+    }
   },
 
   saveSettings(settings: SystemSettings): void {
@@ -861,40 +884,125 @@ export const dbAdapter = {
       let successCount = 0;
       let errorCount = 0;
       let lastErrorMessage = "";
+      let failedTables: string[] = [];
+
+      // Sanitizers to match the exact database schema
+      const sanitizedPatients = patients.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        birthDate: p.birthDate,
+        gender: p.gender || null,
+        phone: p.phone || null,
+        email: p.email || null,
+        address: p.address || null,
+        bloodType: p.bloodType || null,
+        allergies: p.allergies || null,
+        emergencyContact: p.emergencyContact || null,
+        nik: p.nik || null,
+        occupation: p.occupation || null,
+        createdAt: p.createdAt || null,
+        vitals: p.vitals || [],
+        soapNotes: p.soapNotes || [],
+        prescriptions: p.prescriptions || [],
+        labResults: p.labResults || []
+      }));
+
+      const sanitizedAppointments = appointments.map((a: any) => ({
+        id: a.id,
+        patientId: a.patientId,
+        patientName: a.patientName,
+        patientPhone: a.patientPhone || null,
+        date: a.date,
+        time: a.time,
+        reason: a.reason || null,
+        doctorName: a.doctorName || null,
+        status: a.status,
+        whatsappStatus: a.whatsappStatus || null,
+        whatsappMessageSent: a.whatsappMessageSent || null,
+        queueNumber: a.queueNumber || null
+      }));
+
+      const sanitizedDrugs = drugs.map((d: any) => ({
+        id: d.id,
+        name: d.name,
+        dosage: d.dosage || null,
+        category: d.category || null,
+        price: d.price || 0,
+        stock: d.stock || 0,
+        unit: d.unit || null,
+        shelfLocation: d.shelfLocation || null,
+        minStock: d.minStock || 0
+      }));
+
+      const sanitizedInvoices = invoices.map((i: any) => ({
+        id: i.id,
+        patientId: i.patientId,
+        patientName: i.patientName,
+        date: i.date,
+        items: i.items || [],
+        consultationFee: i.consultationFee || 0,
+        treatmentFee: i.treatmentFee || 0,
+        discount: i.discount || 0,
+        tax: i.tax || 0,
+        totalAmount: i.totalAmount || 0,
+        paymentStatus: i.paymentStatus,
+        paymentMethod: i.paymentMethod || null,
+        soapNoteId: i.soapNoteId || null
+      }));
 
       // Push Patients
-      if (patients.length > 0) {
-        const { error } = await supabase.from("patients").upsert(patients);
-        if (error) { errorCount++; lastErrorMessage = error.message; }
-        else { successCount++; }
+      if (sanitizedPatients.length > 0) {
+        const { error } = await supabase.from("patients").upsert(sanitizedPatients);
+        if (error) { 
+          errorCount++; 
+          lastErrorMessage = error.message; 
+          failedTables.push(`patients (${error.message})`);
+        } else { 
+          successCount++; 
+        }
       }
 
       // Push Appointments
-      if (appointments.length > 0) {
-        const { error } = await supabase.from("appointments").upsert(appointments);
-        if (error) { errorCount++; lastErrorMessage = error.message; }
-        else { successCount++; }
+      if (sanitizedAppointments.length > 0) {
+        const { error } = await supabase.from("appointments").upsert(sanitizedAppointments);
+        if (error) { 
+          errorCount++; 
+          lastErrorMessage = error.message; 
+          failedTables.push(`appointments (${error.message})`);
+        } else { 
+          successCount++; 
+        }
       }
 
       // Push Drugs
-      if (drugs.length > 0) {
-        const { error } = await supabase.from("drugs").upsert(drugs);
-        if (error) { errorCount++; lastErrorMessage = error.message; }
-        else { successCount++; }
+      if (sanitizedDrugs.length > 0) {
+        const { error } = await supabase.from("drugs").upsert(sanitizedDrugs);
+        if (error) { 
+          errorCount++; 
+          lastErrorMessage = error.message; 
+          failedTables.push(`drugs (${error.message})`);
+        } else { 
+          successCount++; 
+        }
       }
 
       // Push Invoices
-      if (invoices.length > 0) {
-        const { error } = await supabase.from("invoices").upsert(invoices);
-        if (error) { errorCount++; lastErrorMessage = error.message; }
-        else { successCount++; }
+      if (sanitizedInvoices.length > 0) {
+        const { error } = await supabase.from("invoices").upsert(sanitizedInvoices);
+        if (error) { 
+          errorCount++; 
+          lastErrorMessage = error.message; 
+          failedTables.push(`invoices (${error.message})`);
+        } else { 
+          successCount++; 
+        }
       }
 
       if (errorCount > 0) {
         return {
           success: false,
           message: `Sebagian tabel gagal dipush ke Supabase. Pastikan skema tabel sudah terbuat di SQL console Anda.`,
-          details: lastErrorMessage
+          details: `Gagal di tabel: ${failedTables.join(", ")}`
         };
       }
 
