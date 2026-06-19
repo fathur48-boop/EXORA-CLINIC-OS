@@ -32,7 +32,7 @@ export default function SettingsPanel({ settings, onRefresh }: SettingsPanelProp
 
   // Supabase Active Synchronizer states
   const [isSyncing, setIsSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<{ success?: boolean; msg: string } | null>(null);
+  const [syncStatus, setSyncStatus] = useState<{ success?: boolean; msg: string; details?: any } | null>(null);
   const [showSqlSchema, setShowSqlSchema] = useState(false);
 
   const handlePushToCloud = async () => {
@@ -40,7 +40,7 @@ export default function SettingsPanel({ settings, onRefresh }: SettingsPanelProp
     setSyncStatus(null);
     const result = await dbAdapter.pushLocalToSupabase();
     setIsSyncing(false);
-    setSyncStatus({ success: result.success, msg: result.message });
+    setSyncStatus({ success: result.success, msg: result.message, details: result.details });
   };
 
   const handlePullFromCloud = async () => {
@@ -48,7 +48,7 @@ export default function SettingsPanel({ settings, onRefresh }: SettingsPanelProp
     setSyncStatus(null);
     const result = await dbAdapter.pullFromSupabase();
     setIsSyncing(false);
-    setSyncStatus({ success: result.success, msg: result.message });
+    setSyncStatus({ success: result.success, msg: result.message, details: result.details });
   };
   const [clinicPhone, setClinicPhone] = useState(settings.clinicPhone || '6281234567890');
   const [clinicAddress, setClinicAddress] = useState(settings.clinicAddress || '');
@@ -403,6 +403,11 @@ export default function SettingsPanel({ settings, onRefresh }: SettingsPanelProp
                   <CheckCircle className={`w-4 h-4 ${syncStatus.success ? 'text-emerald-500' : 'text-amber-500'}`} />
                   <span>{syncStatus.msg}</span>
                 </div>
+                {syncStatus.details && (
+                  <div className="p-2 mt-1.5 bg-black/5 rounded-lg border border-black/5 font-mono text-[9px] text-amber-900 leading-normal break-all">
+                    <strong>Detail Error:</strong> {typeof syncStatus.details === 'object' ? JSON.stringify(syncStatus.details) : String(syncStatus.details)}
+                  </div>
+                )}
               </div>
             )}
 
@@ -432,6 +437,9 @@ CREATE TABLE IF NOT EXISTS public.patients (
   address TEXT,
   "bloodType" TEXT,
   allergies TEXT,
+  "emergencyContact" TEXT,
+  nik TEXT,
+  occupation TEXT,
   "createdAt" TEXT,
   vitals JSONB DEFAULT '[]'::jsonb,
   "soapNotes" JSONB DEFAULT '[]'::jsonb,
@@ -464,7 +472,8 @@ CREATE TABLE IF NOT EXISTS public.drugs (
   price INT NOT NULL DEFAULT 0,
   stock INT NOT NULL DEFAULT 0,
   unit TEXT,
-  "shelfLocation" TEXT
+  "shelfLocation" TEXT,
+  "minStock" INT DEFAULT 0
 );
 
 -- 4. Tabel Invoices
