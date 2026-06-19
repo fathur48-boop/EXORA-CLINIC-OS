@@ -1,0 +1,6 @@
+{
+  "name": "Exora Clinic OS",
+  "description": "Sistem operasi klinik modern dan komprehensif untuk manajemen rekam medis pasien, penjadwalan otomatis terintegrasi WhatsApp, dan analisis medis AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
