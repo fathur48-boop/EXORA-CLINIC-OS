@@ -138,6 +138,9 @@ export interface SystemSettings {
   defaultDoctorName: string;
   waTemplateNewAppointment: string;
   waTemplateReminder: string;
+  loginEmail?: string;
+  loginPassword?: string;
+  loginUsername?: string;
 }
 
 export interface UserSession {
