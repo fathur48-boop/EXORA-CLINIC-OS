@@ -57,6 +57,9 @@ export const DEFAULT_SETTINGS: SystemSettings = {
   defaultDoctorName: 'dr. Baharuddin Yusuf, Sp.PD',
   waTemplateNewAppointment: 'Halo *{name}*, konfirmasi janji temu Anda di *{clinic}* telah berhasil pada tanggal *{date}* pukul *{time}* dengan *{doctor}*. Harap datang 15 menit lebih awal. Terima kasih.',
   waTemplateReminder: 'Pengingat otomatis: Halo *{name}*, Anda memiliki jadwal janji temu besok ({date}) pukul *{time}* dengan *{doctor}* di *{clinic}*. Jika ada perubahan, silakan kabari kami.',
+  loginEmail: 'bahlil.99909@gmail.com',
+  loginPassword: 'admin',
+  loginUsername: 'dr. Baharuddin Yusuf, Sp.PD',
 };
 
 // 4-5 Realistic Indonesian patients with complete medical history
