@@ -1,0 +1,30 @@
+{
+  "short_name": "Exora Clinic",
+  "name": "Exora EHR Clinic OS",
+  "description": "Sistem Operasi EHR & Manajemen Klinik Profesional",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f4f7f5",
+  "theme_color": "#25503c",
+  "display": "standalone",
+  "orientation": "portrait"
+}
