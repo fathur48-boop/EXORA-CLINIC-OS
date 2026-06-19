@@ -958,6 +958,13 @@ export const dbAdapter = {
       console.error(e);
       return false;
     }
+  },
+
+  clearAllData(): void {
+    localStorage.setItem(KEYS.PATIENTS, JSON.stringify([]));
+    localStorage.setItem(KEYS.APPOINTMENTS, JSON.stringify([]));
+    localStorage.setItem(KEYS.DRUGS, JSON.stringify([]));
+    localStorage.setItem(KEYS.INVOICES, JSON.stringify([]));
   }
 };
 
